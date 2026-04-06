@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ report_type }} — All Companies</h1>
+<p>
+  {% if date_from or date_to %}{{ date_from or "" }} → {{ date_to or "" }}{% endif %} ·
+  <a href="/reports/run?report_type={{ report_type }}&date_from={{ date_from or '' }}&date_to={{ date_to or '' }}&all_companies=true&merged={{ 'false' if merged else 'true' }}">
+    Switch to {{ 'side-by-side' if merged else 'merged' }}
+  </a> ·
+  <a href="/reports/">← Back</a>
+</p>
+
+{% for nickname, err in errors.items() %}
+  <p class="error">{{ nickname }}: {{ err }}</p>
+{% endfor %}
+
+{% if merged and combined %}
+  {% if combined.unmapped_by_company %}
+    <div class="error">
+      <strong>⚠ Unmapped accounts excluded from merged totals:</strong>
+      <ul>
+        {% for nickname, names in combined.unmapped_by_company.items() %}
+          <li>{{ nickname }}: {{ names | length }} unmapped — {{ names[:5] | join(", ") }}{% if names|length > 5 %}…{% endif %}</li>
+        {% endfor %}
+      </ul>
+      <p><a href="/account-map/">Open Account Map →</a></p>
+    </div>
+  {% endif %}
+
+  <h2>Merged view</h2>
+  <table class="grid">
+    <thead>
+      <tr>
+        <th>Canonical account</th>
+        {% for col in combined.columns %}<th>{{ col }} — total</th>{% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in combined.merged_rows %}
+        <tr>
+          <td>{{ row.canonical }}</td>
+          {% for col in combined.columns %}
+            <td>{{ "%.2f"|format(row.total_by_column.get(col, 0.0)) }}</td>
+          {% endfor %}
+        </tr>
+      {% else %}
+        <tr><td colspan="99">No rows merged. Set up the <a href="/account-map/">Account Map</a>.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  {% for nickname, path, result in per_company %}
+    <h2>{{ nickname }}</h2>
+    <table class="grid">
+      <thead><tr><th>Label</th>{% for col in result.columns %}<th>{{ col }}</th>{% endfor %}</tr></thead>
+      <tbody>
+        {% for row in result.rows %}
+          <tr>
+            <td>{{ row.get("_label", "") }}</td>
+            {% for col in result.columns %}<td>{{ row.get(col, "") }}</td>{% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endfor %}
+{% endif %}
+{% endblock %}

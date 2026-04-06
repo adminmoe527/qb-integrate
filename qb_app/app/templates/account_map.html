@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Account Map · {{ app_name }}{% endblock %}
+{% block content %}
+<h1>Account Map</h1>
+<p class="muted">Map each company's chart-of-accounts names to a shared canonical name so combined reports can merge rows across companies. Per-file reports ignore this map.</p>
+
+<h2>Canonical accounts</h2>
+<ul>
+  {% for name in mapping.canonical_accounts %}
+    <li>{{ name }}</li>
+  {% else %}
+    <li class="muted">None yet.</li>
+  {% endfor %}
+</ul>
+
+<h2>Add / update a mapping</h2>
+<form method="post" action="/account-map/set">
+  <label>Company
+    <select name="company_path">
+      {% for c in companies %}
+        <option value="{{ c.path }}">{{ c.nickname }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Raw account name in QuickBooks <input name="raw_name" required></label>
+  <label>Canonical name <input name="canonical" required></label>
+  <button class="button">Save</button>
+</form>
+
+<h2>Current mappings</h2>
+{% for company_path, m in mapping.per_company.items() %}
+  <h3>{{ company_path }}</h3>
+  <table class="grid">
+    <thead><tr><th>Raw account</th><th>Canonical</th></tr></thead>
+    <tbody>
+      {% for raw, canon in m.items() %}
+        <tr><td>{{ raw }}</td><td>{{ canon }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endfor %}
+{% endblock %}

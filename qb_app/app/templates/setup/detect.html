@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Detect QuickBooks</h1>
+<ul>
+  {% if report.qb_running %}<li>✅ Running</li>{% else %}<li>⚠ Not detected</li>{% endif %}
+  {% if report.qb_product_name %}<li>{{ report.qb_product_name }} {{ report.qb_major_version }}</li>{% endif %}
+  {% if report.company_file %}<li>Open file: {{ report.company_file }}</li>{% endif %}
+  {% if report.chosen_qbxml_version %}<li>qbXML version: {{ report.chosen_qbxml_version }}</li>{% endif %}
+</ul>
+{% for issue in report.issues %}<p class="error">{{ issue }}</p>{% endfor %}
+<p><a class="button" href="/setup/folder">Continue →</a></p>
+{% endblock %}

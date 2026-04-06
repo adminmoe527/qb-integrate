@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Dashboard</h1>
+{% if not active_company %}
+  <p>No company selected. <a href="/setup">Run Setup</a>.</p>
+{% else %}
+  <p>Active: <strong>{{ active_company.nickname }}</strong>
+     ({{ config.companies | length }} companies registered,
+      {{ config.companies | selectattr("authorized") | list | length }} authorized)</p>
+  <ul>
+    <li><a href="/customers/">Customers</a></li>
+    <li><a href="/invoices/">Invoices</a></li>
+    <li><a href="/reports/">Reports</a></li>
+    <li><a href="/account-map/">Account Map</a></li>
+    <li><a href="/settings/">Settings</a></li>
+  </ul>
+{% endif %}
+{% endblock %}

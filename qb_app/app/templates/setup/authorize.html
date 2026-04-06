@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Authorize each company file</h1>
+<p>For each file: open it in QuickBooks (Admin, single-user mode), then click <em>Authorize</em>. Approve the dialog inside QuickBooks — pick <em>"Yes, always; allow even if QuickBooks is not running"</em>.</p>
+{% if message %}<p>{{ message }}</p>{% endif %}
+<table class="grid">
+  <thead><tr><th>Nickname</th><th>Path</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for c in companies %}
+    <tr>
+      <td>{{ c.nickname }}</td>
+      <td>{{ c.path }}</td>
+      <td>{{ "✅" if c.authorized else "—" }}</td>
+      <td>
+        <form method="post" action="/setup/authorize/{{ c.nickname }}" style="display:inline">
+          <button class="button">Authorize</button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+<p><a class="button" href="/setup/test">Continue →</a></p>
+{% endblock %}

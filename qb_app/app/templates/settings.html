@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Settings · {{ app_name }}{% endblock %}
+{% block content %}
+<h1>Settings</h1>
+
+<section>
+  <h2>Company file folder</h2>
+  <form method="post" action="/settings/folder">
+    <label>Folder
+      <input name="folder" value="{{ config.quickbooks.company_folder or '' }}" placeholder="C:\Users\...\QB Files" required>
+    </label>
+    <button class="button">Rescan</button>
+  </form>
+</section>
+
+<section>
+  <h2>Company files</h2>
+  <table class="grid">
+    <thead><tr><th>Nickname</th><th>Path</th><th>Authorized</th><th>qbXML</th><th></th></tr></thead>
+    <tbody>
+      {% for c in config.companies %}
+      <tr>
+        <td>{{ c.nickname }}</td>
+        <td>{{ c.path }}</td>
+        <td>{% if c.authorized %}✅{% else %}—{% endif %}</td>
+        <td>{{ c.qbxml_version }}</td>
+        <td>
+          <form method="post" action="/settings/companies/{{ c.nickname }}/remove" style="display:inline">
+            <button class="button danger">Remove</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>QuickBooks SDK</h2>
+  <p>ProgID: <code>{{ config.quickbooks.qbfc_progid }}</code> &middot; qbXML version: <code>{{ config.quickbooks.qbxml_version }}</code></p>
+</section>
+
+<section>
+  <h2>Wizard</h2>
+  <form method="post" action="/settings/rerun-wizard">
+    <button class="button">Re-run Setup Wizard</button>
+  </form>
+</section>
+{% endblock %}

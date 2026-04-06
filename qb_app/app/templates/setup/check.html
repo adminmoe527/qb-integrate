@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>System check</h1>
+<ul>
+  <li>{{ "✅" if report.is_windows else "❌" }} Windows platform</li>
+  <li>✅ Python {{ report.python_version }}</li>
+  <li>{{ "✅" if report.qbfc_installed else "❌" }} QuickBooks SDK
+      {%- if report.chosen_progid %} ({{ report.chosen_progid }}){% endif %}</li>
+</ul>
+{% for issue in report.issues %}<p class="error">{{ issue }}</p>{% endfor %}
+{% if report.qbfc_installed %}
+  <p><a class="button" href="/setup/detect">Continue →</a></p>
+{% else %}
+  <form method="post" action="/setup/install-sdk"><button class="button">Install QuickBooks SDK</button></form>
+{% endif %}
+{% endblock %}

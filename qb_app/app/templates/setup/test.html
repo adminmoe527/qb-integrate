@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Smoke tests</h1>
+<p>Runs a read, a P&L, and a dry-run invoice against the first authorized company.</p>
+<form method="post" action="/setup/test"><button class="button">Run tests</button></form>
+
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+
+{% if results %}
+  <ul>
+    {% for k, v in results.items() %}
+      <li>{{ "✅" if v.ok else "❌" }} {{ k }}: {{ v.detail }}</li>
+    {% endfor %}
+  </ul>
+  <form method="post" action="/setup/finish"><button class="button">Finish setup →</button></form>
+{% endif %}
+{% endblock %}

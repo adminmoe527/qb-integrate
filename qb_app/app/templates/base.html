@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ app_name }}{% endblock %}</title>
+  <script src="/static/htmx.min.js"></script>
+  <link rel="stylesheet" href="/static/app.css?v={{ version }}">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><a href="/">{{ app_name }}</a></div>
+  <nav class="topnav">
+    <a href="/">Dashboard</a>
+    <a href="/reports/">Reports</a>
+    <a href="/customers/">Customers</a>
+    <a href="/invoices/">Invoices</a>
+    <a href="/account-map/">Account Map</a>
+    <a href="/settings/">Settings</a>
+  </nav>
+  {% if config.companies %}
+  <div class="company-picker">
+    <form method="post" action="/companies/switch/" onsubmit="this.action='/companies/switch/'+this.nickname.value">
+      <label>Company:
+        <select name="nickname" onchange="this.form.submit()">
+          {% for c in config.companies %}
+            <option value="{{ c.nickname }}" {% if active_company and active_company.nickname == c.nickname %}selected{% endif %}>
+              {{ c.nickname }}{% if not c.authorized %} (not authorized){% endif %}
+            </option>
+          {% endfor %}
+        </select>
+      </label>
+    </form>
+  </div>
+  {% endif %}
+</header>
+<main class="container">
+  {% block content %}{% endblock %}
+</main>
+<footer class="footer">v{{ version }}</footer>
+</body>
+</html>

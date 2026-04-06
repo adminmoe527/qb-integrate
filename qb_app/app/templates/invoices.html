@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Invoices</h1>
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+
+{% if result %}
+  {% if result.dry_run %}
+    <h2>Dry run — qbXML preview</h2>
+    <pre>{{ result.xml }}</pre>
+  {% else %}
+    <p>✅ Created invoice <strong>{{ result.ref_number or result.txn_id }}</strong></p>
+  {% endif %}
+{% endif %}
+
+<form method="get" action="/invoices/">
+  <label>Limit <input type="number" name="limit" value="{{ limit or 100 }}"></label>
+  <button class="button">Refresh</button>
+</form>
+
+<h2>New invoice</h2>
+<form method="post" action="/invoices/new">
+  <label>Customer <input name="customer_name" required></label>
+  <label>Ref # <input name="ref_number"></label>
+  <label>Memo <input name="memo"></label>
+  <label>Line items (JSON)
+    <textarea name="line_items_json" rows="4" required placeholder='[{"item_name":"Widget","quantity":2,"rate":49.99}]'></textarea>
+  </label>
+  <label><input type="checkbox" name="dry_run" value="true"> Dry run</label>
+  <button class="button">Create</button>
+</form>
+
+<table class="grid">
+  <thead><tr><th>Ref</th><th>Date</th><th>Customer</th><th>Total</th><th>Balance</th><th>Paid</th></tr></thead>
+  <tbody>
+    {% for i in rows %}
+      <tr><td>{{ i.ref_number or "" }}</td><td>{{ i.txn_date or "" }}</td><td>{{ i.customer or "" }}</td><td>{{ i.total or "" }}</td><td>{{ i.balance_remaining or "" }}</td><td>{% if i.is_paid %}✅{% endif %}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

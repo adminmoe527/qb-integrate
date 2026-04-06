@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Pick folder · {{ app_name }}{% endblock %}
+{% block content %}
+<h1>Company file folder</h1>
+<p>Enter the folder where all your QuickBooks <code>.qbw</code> files live. The app will scan it and register each file.</p>
+<form method="post" action="/setup/folder">
+  <label>Folder path
+    <input type="text" name="folder" value="{{ current_folder or '' }}" placeholder="C:\Users\...\QB Files" required>
+  </label>
+  <button class="button" type="submit">Scan &rarr;</button>
+</form>
+
+{% if companies %}
+  <h2>Registered company files</h2>
+  <ul>
+    {% for c in companies %}
+      <li><strong>{{ c.nickname }}</strong> — {{ c.path }} {% if c.authorized %}<span class="ok">✅ authorized</span>{% endif %}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+{% endblock %}
