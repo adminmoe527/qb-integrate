@@ -1,12 +1,13 @@
 """Reports UI."""
 from __future__ import annotations
 
+import csv
 import io
 from typing import Callable, Optional
 
-import pandas as pd
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, StreamingResponse
+from openpyxl import Workbook
 
 from ...qb import reports as qb_reports
 from ...qb.account_map import AccountMapping, combine
@@ -101,6 +102,9 @@ def router(render: Callable) -> APIRouter:
             date_to=date_to,
         )
 
+    def _columns(result) -> list[str]:  # noqa: ANN001
+        return ["_label"] + list(result.columns)
+
     @r.get("/export.csv")
     async def export_csv(report_type: str, date_from: Optional[str] = None, date_to: Optional[str] = None):
         active = state.active_company()
@@ -108,7 +112,11 @@ def router(render: Callable) -> APIRouter:
             return HTMLResponse("No active company", status_code=400)
         result = _run(active, report_type, date_from, date_to)
         buf = io.StringIO()
-        pd.DataFrame(result.rows).to_csv(buf, index=False)
+        cols = _columns(result)
+        writer = csv.DictWriter(buf, fieldnames=cols, extrasaction="ignore")
+        writer.writeheader()
+        for row in result.rows:
+            writer.writerow({c: row.get(c, "") for c in cols})
         return StreamingResponse(
             iter([buf.getvalue()]),
             media_type="text/csv",
@@ -121,9 +129,15 @@ def router(render: Callable) -> APIRouter:
         if not active:
             return HTMLResponse("No active company", status_code=400)
         result = _run(active, report_type, date_from, date_to)
+        wb = Workbook()
+        ws = wb.active
+        ws.title = report_type[:31]
+        cols = _columns(result)
+        ws.append(cols)
+        for row in result.rows:
+            ws.append([row.get(c, "") for c in cols])
         buf = io.BytesIO()
-        with pd.ExcelWriter(buf, engine="openpyxl") as writer:
-            pd.DataFrame(result.rows).to_excel(writer, index=False, sheet_name=report_type[:31])
+        wb.save(buf)
         buf.seek(0)
         return StreamingResponse(
             buf,
